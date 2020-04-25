@@ -19,27 +19,29 @@ export const PbToBoard = (board: pbBoard): Board =>
   board.getPixelsList().map((px) => new Pixel(px.getX(), px.getY()));
 
 export const printBoard = (board: Board, size = 10) => {
-  const xs = board.map((p) => p.x);
-  const ys = board.map((p) => p.y);
-  const xy = new Set(board.map((p) => p.x + "," + p.y));
+  console.log(board);
 
-  let minX = Math.min.apply(null, xs);
-  let minY = Math.min.apply(null, ys);
+  // const xs = board.map((p) => p.x);
+  // const ys = board.map((p) => p.y);
+  // const xy = new Set(board.map((p) => p.x + "," + p.y));
 
-  minX = isFinite(minX) ? minX : 0;
-  minY = isFinite(minY) ? minY : 0;
+  // let minX = Math.min.apply(null, xs);
+  // let minY = Math.min.apply(null, ys);
 
-  console.log(`[${minX}, ${minY}]`);
+  // minX = isFinite(minX) ? minX : 0;
+  // minY = isFinite(minY) ? minY : 0;
 
-  for (let x = 0; x < size; x++) {
-    let l = "";
-    for (let y = 0; y < size; y++) {
-      if (xy.has(`${minX + x},${minY + y}`)) {
-        l += "X";
-      } else {
-        l += ".";
-      }
-    }
-    console.log(l);
-  }
+  // console.log(`[${minX}, ${minY}]`);
+
+  // for (let x = 0; x < size; x++) {
+  //   let l = "";
+  //   for (let y = 0; y < size; y++) {
+  //     if (xy.has(`${minX + x},${minY + y}`)) {
+  //       l += "X";
+  //     } else {
+  //       l += ".";
+  //     }
+  //   }
+  //   console.log(l);
+  // }
 };

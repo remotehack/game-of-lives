@@ -68,7 +68,7 @@ export function willPixelInteractWithBoard(
 }
 
 interface IBoardUpdateState {
-  prev: Board;
+  board: Board;
   sent: boolean;
   result: Board;
 }
@@ -77,38 +77,28 @@ interface IGameState {
   previousState: Board;
   boardsToProcess: IBoardUpdateState[];
   drawnState: Board;
-  queue: Promise<Board>[];
+  queue: ((board: Board) => void)[];
 }
 
-// // interface IAltGameState {
-// //   state: Board[];
-// //   next: Map<Board, Board>;
-// // }
-
-// // promise queue
-
-// //
-
-// let initialState: Board = [];
+let initialState: Board = [];
 
 let state: IGameState = {
   previousState: initialState,
   boardsToProcess: [
     {
-      prev: initialState,
+      board: initialState,
       sent: false,
       result: undefined,
     },
   ],
   drawnState: [],
+  queue: [],
 };
 
-// const nextBoard = async (): Promise<Board> => {
-//   while (true) {}
-// };
-
 function getNext() {
-  return ++itemsTaken;
+  const next = state.boardsToProcess.find((btp) => btp.sent === false);
+  next.sent = true;
+  return next.board;
 }
 
 function hasNext() {
@@ -116,16 +106,32 @@ function hasNext() {
 }
 
 function reset() {
-  itemsReturned = 0;
-  itemsTaken = 0;
+  console.log("generation end");
+  const nextBoard: Board = state.boardsToProcess
+    .map((b) => b.result)
+    .reduce((prev, curr) => prev.concat(curr), []);
+
+  const nextBoardWithDraw = nextBoard.concat(state.drawnState);
+
+  const filteredToUniqueBoard = nextBoardWithDraw.filter(
+    (value, index, self) => self.indexOf(value) === index
+  );
+
+  state.drawnState = [];
+  state.previousState = nextBoardWithDraw;
+  state.boardsToProcess = splitBoard(nextBoardWithDraw).map((b) => ({
+    board: b,
+    sent: false,
+    result: undefined,
+  }));
 }
 
-async function getNextAvailableBoard(): Board {
+async function getNextAvailableBoard(): Promise<Board> {
   if (hasNext()) {
-    return getNext();
+    return Promise.resolve(getNext());
   } else {
     return new Promise(function (resolve) {
-      queue.push(function callback(index) {
+      state.queue.push(function callback(index) {
         resolve(index);
       });
     });
@@ -133,12 +139,14 @@ async function getNextAvailableBoard(): Board {
 }
 
 function updateBoard(prev: Board, next: Board) {
-  itemsReturned++;
+  const btp = state.boardsToProcess.find((b) => b.board === prev);
 
-  if (itemsReturned >= MAX_ITEMS) {
+  btp.result = next;
+
+  if (state.boardsToProcess.every((b) => b.result !== undefined)) {
     reset();
-    while (queue.length > 0 && hasNext()) {
-      const cb = queue.shift();
+    while (state.queue.length > 0 && hasNext()) {
+      const cb = state.queue.shift();
       cb(getNext());
     }
   }
@@ -155,16 +163,18 @@ import { Noop, Board as pbBoard } from "./generated/service_pb";
 import { boardToPb, PbToBoard, printBoard } from "./helpers";
 
 // Set a pixel to the board
-const draw: IgameOfLivesServer["draw"] = (call) => {
+const draw: IgameOfLivesServer["draw"] = (call, callback) => {
   const { x, y } = call.request.toObject();
 
-  const found = board.some((p) => p.x === x && p.y === y);
+  console.log("drawing", x, y);
+
+  const found = state.drawnState.some((p) => p.x === x && p.y === y);
 
   if (!found) {
-    board.push(new Pixel(x, y));
+    state.drawnState.push(new Pixel(x, y));
   }
 
-  return new Noop();
+  callback(null, new Noop());
 };
 
 const solve: IgameOfLivesServer["solve"] = async (call) => {
@@ -188,7 +198,7 @@ const solve: IgameOfLivesServer["solve"] = async (call) => {
 
     updateBoard(todo, done);
 
-    printBoard(done);
+    console.log("updated", done);
   }
 };
 
