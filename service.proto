@@ -1,0 +1,26 @@
+
+syntax = "proto3";
+
+service gameOfLives {
+  // tools would implement this
+  rpc solve (stream Tile) returns (stream Tile);
+
+  // for showing a frontend
+  rpc watch (Noop) returns (stream Tile);
+
+  // for adding content
+  rpc draw (stream Pixel) returns (Noop);
+}
+
+message Tile {
+  // coordinates!
+  repeated Pixel coords = 1;
+}
+
+message Pixel {
+  int32 x = 1;
+  int32 y = 2;
+}
+
+message Noop {
+}
