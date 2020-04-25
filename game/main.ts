@@ -67,18 +67,18 @@ export function willPixelInteractWithBoard(
   return board.some((p) => p.distanceTo(pixelToCheck) <= Math.SQRT2);
 }
 
-// interface IBoardUpdateState {
-//   prev: Board;
-//   sent: boolean;
-//   result: Board;
-// }
+interface IBoardUpdateState {
+  prev: Board;
+  sent: boolean;
+  result: Board;
+}
 
-// interface IGameState {
-//   previousState: Board;
-//   boardsToProcess: IBoardUpdateState[];
-//   drawnState: Board;
-//   queue: Promise<Board>[];
-// }
+interface IGameState {
+  previousState: Board;
+  boardsToProcess: IBoardUpdateState[];
+  drawnState: Board;
+  queue: Promise<Board>[];
+}
 
 // // interface IAltGameState {
 // //   state: Board[];
@@ -91,33 +91,58 @@ export function willPixelInteractWithBoard(
 
 // let initialState: Board = [];
 
-// let state: IGameState = {
-//   previousState: initialState,
-//   boardsToProcess: [
-//     {
-//       prev: initialState,
-//       sent: false,
-//       result: undefined,
-//     },
-//   ],
-//   drawnState: [],
-// };
+let state: IGameState = {
+  previousState: initialState,
+  boardsToProcess: [
+    {
+      prev: initialState,
+      sent: false,
+      result: undefined,
+    },
+  ],
+  drawnState: [],
+};
 
 // const nextBoard = async (): Promise<Board> => {
 //   while (true) {}
 // };
 
-let board: Board = [];
+function getNext() {
+  return ++itemsTaken;
+}
 
-const getNextAvailableBoard = async (): Promise<Board> => {
-  return board;
-};
+function hasNext() {
+  return state.boardsToProcess.some((btp) => btp.sent === false);
+}
 
-const updateBoard = (prev: Board, next: Board) => {
-  if (prev == board) {
-    board = next;
+function reset() {
+  itemsReturned = 0;
+  itemsTaken = 0;
+}
+
+async function getNextAvailableBoard(): Board {
+  if (hasNext()) {
+    return getNext();
+  } else {
+    return new Promise(function (resolve) {
+      queue.push(function callback(index) {
+        resolve(index);
+      });
+    });
   }
-};
+}
+
+function updateBoard(prev: Board, next: Board) {
+  itemsReturned++;
+
+  if (itemsReturned >= MAX_ITEMS) {
+    reset();
+    while (queue.length > 0 && hasNext()) {
+      const cb = queue.shift();
+      cb(getNext());
+    }
+  }
+}
 
 // grpc server stuff
 // const server = new
@@ -126,11 +151,8 @@ import {
   gameOfLivesService,
   IgameOfLivesServer,
 } from "./generated/service_grpc_pb";
-import {
-  Noop,
-  Board as pbBoard,
-  Pixel as pbPixel,
-} from "./generated/service_pb";
+import { Noop, Board as pbBoard } from "./generated/service_pb";
+import { boardToPb, PbToBoard, printBoard } from "./helpers";
 
 // Set a pixel to the board
 const draw: IgameOfLivesServer["draw"] = (call) => {
@@ -144,24 +166,6 @@ const draw: IgameOfLivesServer["draw"] = (call) => {
 
   return new Noop();
 };
-
-// helpers
-const boardToPb = (board: Board): pbBoard => {
-  const pixelList = board.map((p) => {
-    const px = new pbPixel();
-    px.setX(p.x);
-    px.setY(p.y);
-
-    return px;
-  });
-
-  const pb = new pbBoard();
-  pb.setPixelsList(pixelList);
-  return pb;
-};
-
-const PbToBoard = (board: pbBoard): Board =>
-  board.getPixelsList().map((px) => new Pixel(px.getX(), px.getY()));
 
 const solve: IgameOfLivesServer["solve"] = async (call) => {
   console.log("Connection", call.getPeer());
@@ -183,6 +187,8 @@ const solve: IgameOfLivesServer["solve"] = async (call) => {
     const done = PbToBoard(response);
 
     updateBoard(todo, done);
+
+    printBoard(done);
   }
 };
 

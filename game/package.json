@@ -5,6 +5,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "start": "ts-node main.ts",
     "test": "ts-node test.ts | tap-spec",
     "test:watch": "nodemon --exec 'npm run test' *.ts"
   },
