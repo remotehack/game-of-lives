@@ -5,8 +5,20 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "ts-node test.ts | tap-nyan",
+    "test:watch": "nodemon --exec 'npm run test' *.ts"
   },
   "author": "Ben & Panda",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "@types/tape": "^4.13.0",
+    "nodemon": "^2.0.3",
+    "tap-nyan": "^1.1.0",
+    "tape": "^5.0.0",
+    "ts-node": "^8.9.0",
+    "ts-node-dev": "^1.0.0-pre.44"
+  },
+  "dependencies": {
+    "typescript": "^3.8.3"
+  }
 }
