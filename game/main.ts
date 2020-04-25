@@ -67,27 +67,47 @@ export function willPixelInteractWithBoard(
   return board.some((p) => p.distanceTo(pixelToCheck) <= Math.SQRT2);
 }
 
-const x = new Map<Board, number>();
+// interface IBoardUpdateState {
+//   prev: Board;
+//   sent: boolean;
+//   result: Board;
+// }
 
-interface IBoardUpdateState {
-  prev: Board;
-  sent: boolean;
-  result: Board;
-}
+// interface IGameState {
+//   previousState: Board;
+//   boardsToProcess: IBoardUpdateState[];
+//   drawnState: Board;
+//   queue: Promise<Board>[];
+// }
 
-interface IGameState {
-  previousState: Board;
-  boardsToProcess: IBoardUpdateState[];
-  drawnState: Board;
-}
+// // interface IAltGameState {
+// //   state: Board[];
+// //   next: Map<Board, Board>;
+// // }
 
-let initialState: Board = [];
+// // promise queue
 
-let state: IGameState = {
-  previousState: initialState,
-  boardsToProcess: [initialState],
-  drawnState: [],
-};
+// //
+
+// let initialState: Board = [];
+
+// let state: IGameState = {
+//   previousState: initialState,
+//   boardsToProcess: [
+//     {
+//       prev: initialState,
+//       sent: false,
+//       result: undefined,
+//     },
+//   ],
+//   drawnState: [],
+// };
+
+// const nextBoard = async (): Promise<Board> => {
+//   while (true) {}
+// };
+
+let board: Board = [];
 
 const getNextAvailableBoard = async (): Promise<Board> => {
   return board;
@@ -153,6 +173,8 @@ const solve: IgameOfLivesServer["solve"] = async (call) => {
       call.once("data", resolve);
     });
 
+    console.log("GOT BACK", response.toObject());
+
     const done: Board = response
       .getPixelsList()
       .map((pb) => new Pixel(pb.getX(), pb.getY()));
@@ -161,7 +183,7 @@ const solve: IgameOfLivesServer["solve"] = async (call) => {
   }
 };
 
-export function serverStuff() {
+if (require.main === module) {
   const server = new Server();
 
   server.addService(gameOfLivesService, { solve, draw });
