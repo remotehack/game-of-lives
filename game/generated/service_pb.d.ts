@@ -6,26 +6,26 @@
 
 import * as jspb from "google-protobuf";
 
-export class Tile extends jspb.Message { 
-    clearCoordsList(): void;
-    getCoordsList(): Array<Pixel>;
-    setCoordsList(value: Array<Pixel>): void;
-    addCoords(value?: Pixel, index?: number): Pixel;
+export class Board extends jspb.Message { 
+    clearPixelsList(): void;
+    getPixelsList(): Array<Pixel>;
+    setPixelsList(value: Array<Pixel>): void;
+    addPixels(value?: Pixel, index?: number): Pixel;
 
 
     serializeBinary(): Uint8Array;
-    toObject(includeInstance?: boolean): Tile.AsObject;
-    static toObject(includeInstance: boolean, msg: Tile): Tile.AsObject;
+    toObject(includeInstance?: boolean): Board.AsObject;
+    static toObject(includeInstance: boolean, msg: Board): Board.AsObject;
     static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
     static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
-    static serializeBinaryToWriter(message: Tile, writer: jspb.BinaryWriter): void;
-    static deserializeBinary(bytes: Uint8Array): Tile;
-    static deserializeBinaryFromReader(message: Tile, reader: jspb.BinaryReader): Tile;
+    static serializeBinaryToWriter(message: Board, writer: jspb.BinaryWriter): void;
+    static deserializeBinary(bytes: Uint8Array): Board;
+    static deserializeBinaryFromReader(message: Board, reader: jspb.BinaryReader): Board;
 }
 
-export namespace Tile {
+export namespace Board {
     export type AsObject = {
-        coordsList: Array<Pixel.AsObject>,
+        pixelsList: Array<Pixel.AsObject>,
     }
 }
 

@@ -3,18 +3,18 @@ syntax = "proto3";
 
 service gameOfLives {
   // clients would solve using this
-  rpc solve (stream Tile) returns (stream Tile);
+  rpc solve (stream Board) returns (stream Board);
 
   // for showing a frontend
-  rpc watch (Noop) returns (stream Tile);
+  rpc watch (Noop) returns (stream Board);
 
   // for adding content
   rpc draw (Pixel) returns (Noop);
 }
 
-message Tile {
+message Board {
   // coordinates!
-  repeated Pixel coords = 1;
+  repeated Pixel pixels = 1;
 }
 
 message Pixel {

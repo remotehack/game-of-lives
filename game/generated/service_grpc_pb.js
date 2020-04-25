@@ -4,6 +4,17 @@
 var grpc = require('grpc');
 var service_pb = require('./service_pb.js');
 
+function serialize_Board(arg) {
+  if (!(arg instanceof service_pb.Board)) {
+    throw new Error('Expected argument of type Board');
+  }
+  return Buffer.from(arg.serializeBinary());
+}
+
+function deserialize_Board(buffer_arg) {
+  return service_pb.Board.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
 function serialize_Noop(arg) {
   if (!(arg instanceof service_pb.Noop)) {
     throw new Error('Expected argument of type Noop');
@@ -26,17 +37,6 @@ function deserialize_Pixel(buffer_arg) {
   return service_pb.Pixel.deserializeBinary(new Uint8Array(buffer_arg));
 }
 
-function serialize_Tile(arg) {
-  if (!(arg instanceof service_pb.Tile)) {
-    throw new Error('Expected argument of type Tile');
-  }
-  return Buffer.from(arg.serializeBinary());
-}
-
-function deserialize_Tile(buffer_arg) {
-  return service_pb.Tile.deserializeBinary(new Uint8Array(buffer_arg));
-}
-
 
 var gameOfLivesService = exports.gameOfLivesService = {
   // clients would solve using this
@@ -44,12 +44,12 @@ var gameOfLivesService = exports.gameOfLivesService = {
     path: '/gameOfLives/solve',
     requestStream: true,
     responseStream: true,
-    requestType: service_pb.Tile,
-    responseType: service_pb.Tile,
-    requestSerialize: serialize_Tile,
-    requestDeserialize: deserialize_Tile,
-    responseSerialize: serialize_Tile,
-    responseDeserialize: deserialize_Tile,
+    requestType: service_pb.Board,
+    responseType: service_pb.Board,
+    requestSerialize: serialize_Board,
+    requestDeserialize: deserialize_Board,
+    responseSerialize: serialize_Board,
+    responseDeserialize: deserialize_Board,
   },
   // for showing a frontend
   watch: {
@@ -57,11 +57,11 @@ var gameOfLivesService = exports.gameOfLivesService = {
     requestStream: false,
     responseStream: true,
     requestType: service_pb.Noop,
-    responseType: service_pb.Tile,
+    responseType: service_pb.Board,
     requestSerialize: serialize_Noop,
     requestDeserialize: deserialize_Noop,
-    responseSerialize: serialize_Tile,
-    responseDeserialize: deserialize_Tile,
+    responseSerialize: serialize_Board,
+    responseDeserialize: deserialize_Board,
   },
   // for adding content
   draw: {
