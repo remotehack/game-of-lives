@@ -5,16 +5,18 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "ts-node test.ts | tap-nyan",
+    "test": "ts-node test.ts | tap-spec",
     "test:watch": "nodemon --exec 'npm run test' *.ts"
   },
   "author": "Ben & Panda",
   "license": "MIT",
   "devDependencies": {
     "@types/tape": "^4.13.0",
+    "faucet": "0.0.1",
     "grpc_tools_node_protoc_ts": "^3.0.0",
     "nodemon": "^2.0.3",
     "tap-nyan": "^1.1.0",
+    "tap-spec": "^5.0.0",
     "tape": "^5.0.0",
     "ts-node": "^8.9.0",
     "ts-node-dev": "^1.0.0-pre.44"
