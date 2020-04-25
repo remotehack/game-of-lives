@@ -145,6 +145,24 @@ const draw: IgameOfLivesServer["draw"] = (call) => {
   return new Noop();
 };
 
+// helpers
+const boardToPb = (board: Board): pbBoard => {
+  const pixelList = board.map((p) => {
+    const px = new pbPixel();
+    px.setX(p.x);
+    px.setY(p.y);
+
+    return px;
+  });
+
+  const pb = new pbBoard();
+  pb.setPixelsList(pixelList);
+  return pb;
+};
+
+const PbToBoard = (board: pbBoard): Board =>
+  board.getPixelsList().map((px) => new Pixel(px.getX(), px.getY()));
+
 const solve: IgameOfLivesServer["solve"] = async (call) => {
   console.log("Connection", call.getPeer());
 
@@ -152,32 +170,17 @@ const solve: IgameOfLivesServer["solve"] = async (call) => {
   while (maxIters--) {
     await new Promise((r) => setTimeout(r, 1000));
 
+    // Send board to client
     const todo = await getNextAvailableBoard();
-
-    // SEND TO CLIENT
-    const request = new pbBoard();
-    request.setPixelsList(
-      todo.map((p) => {
-        const px = new pbPixel();
-        px.setX(p.x);
-        px.setY(p.y);
-
-        return px;
-      })
-    );
-
+    const request = boardToPb(todo);
     call.write(request);
 
-    // wait for response
+    // Wait for response
     const response: pbBoard = await new Promise((resolve) => {
       call.once("data", resolve);
     });
 
-    console.log("GOT BACK", response.toObject());
-
-    const done: Board = response
-      .getPixelsList()
-      .map((pb) => new Pixel(pb.getX(), pb.getY()));
+    const done = PbToBoard(response);
 
     updateBoard(todo, done);
   }
