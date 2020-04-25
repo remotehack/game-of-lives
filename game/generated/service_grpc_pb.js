@@ -39,7 +39,7 @@ function deserialize_Tile(buffer_arg) {
 
 
 var gameOfLivesService = exports.gameOfLivesService = {
-  // tools would implement this
+  // clients would solve using this
   solve: {
     path: '/gameOfLives/solve',
     requestStream: true,
@@ -66,7 +66,7 @@ var gameOfLivesService = exports.gameOfLivesService = {
   // for adding content
   draw: {
     path: '/gameOfLives/draw',
-    requestStream: true,
+    requestStream: false,
     responseStream: false,
     requestType: service_pb.Pixel,
     responseType: service_pb.Noop,
