@@ -1,6 +1,6 @@
 const { credentials } = require("grpc");
 const { gameOfLivesClient } = require("./generated/service_grpc_pb");
-const { Pixel } = require("./generated/service_pb");
+const { Pixel, Board } = require("./generated/service_pb");
 
 const neighbours = (x, y) => [
   [x - 1, y - 1],
@@ -31,6 +31,8 @@ const solver = (board) => {
       counts.set(key, prev + 1);
     }
   }
+
+  const board2 = new Board();
   for (const [key, count] of Object.entries(counts)) {
     if (count === 2 || count === 3) {
       let [x, y] = key.split(".").map(parseFloat);
@@ -38,15 +40,15 @@ const solver = (board) => {
       pixel.setX(x);
       pixel.setY(y);
 
-      board.addPixels(pixel);
+      board2.addPixels(pixel);
     }
   }
 
-  console.log(">>>>>", board.toObject());
+  console.log(">>>>>", board2.toObject());
 
   console.log("🙌🙌🙌🙌");
 
-  return board;
+  return board2;
 };
 
 // Connect to gRPC client and

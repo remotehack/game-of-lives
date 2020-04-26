@@ -29,7 +29,7 @@ export function splitBoard(boardToSplit: Board): Board[] {
 
   let currentBoard: Board = [remainingPixels.pop()];
 
-  while (remainingPixels.length > 0) {
+  while (true) {
     while (true) {
       let interacted = false;
 
@@ -50,7 +50,13 @@ export function splitBoard(boardToSplit: Board): Board[] {
     }
 
     boards.push(currentBoard);
-    currentBoard = [remainingPixels.pop()];
+
+    const poppedPixel = remainingPixels.pop();
+
+    if (poppedPixel === undefined) {
+      break;
+    }
+    currentBoard = [poppedPixel];
   }
 
   return boards;
@@ -74,7 +80,6 @@ interface IBoardUpdateState {
 }
 
 interface IGameState {
-  previousState: Board;
   boardsToProcess: IBoardUpdateState[];
   drawnState: Board;
   queue: ((board: Board) => void)[];
@@ -83,7 +88,6 @@ interface IGameState {
 let initialState: Board = [];
 
 let state: IGameState = {
-  previousState: initialState,
   boardsToProcess: [
     {
       board: initialState,
@@ -106,24 +110,22 @@ function hasNext() {
 }
 
 function reset() {
-  console.log("generation end");
+  let before = state.boardsToProcess.length;
+
   const nextBoard: Board = state.boardsToProcess
     .map((b) => b.result)
     .reduce((prev, curr) => prev.concat(curr), []);
 
   const nextBoardWithDraw = nextBoard.concat(state.drawnState);
 
-  const filteredToUniqueBoard = nextBoardWithDraw.filter(
-    (value, index, self) => self.indexOf(value) === index
-  );
-
   state.drawnState = [];
-  state.previousState = nextBoardWithDraw;
   state.boardsToProcess = splitBoard(nextBoardWithDraw).map((b) => ({
     board: b,
     sent: false,
     result: undefined,
   }));
+
+  printBoard(nextBoardWithDraw, 35);
 }
 
 async function getNextAvailableBoard(): Promise<Board> {
@@ -140,7 +142,6 @@ async function getNextAvailableBoard(): Promise<Board> {
 
 function updateBoard(prev: Board, next: Board) {
   const btp = state.boardsToProcess.find((b) => b.board === prev);
-
   btp.result = next;
 
   if (state.boardsToProcess.every((b) => b.result !== undefined)) {
@@ -180,16 +181,15 @@ const draw: IgameOfLivesServer["draw"] = (call, callback) => {
 const solve: IgameOfLivesServer["solve"] = async (call) => {
   console.log("Connection", call.getPeer());
 
-  let maxIters = 10;
-  while (maxIters--) {
-    await new Promise((r) => setTimeout(r, 1000));
+  while (true) {
+    await new Promise((r) => setTimeout(r, 50));
 
     // Send board to client
     const todo = await getNextAvailableBoard();
     const request = boardToPb(todo);
     call.write(request);
 
-    // Wait for response
+    // Wait for responses
     const response: pbBoard = await new Promise((resolve) => {
       call.once("data", resolve);
     });
@@ -198,8 +198,10 @@ const solve: IgameOfLivesServer["solve"] = async (call) => {
 
     updateBoard(todo, done);
 
-    console.log("updated", done);
+    // console.log("updated", todo, "->", done);
   }
+
+  // call.end();
 };
 
 if (require.main === module) {

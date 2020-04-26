@@ -53,7 +53,7 @@ test("willPixelsInteractWithBoard", function (t) {
 });
 
 test("splitBoard", function (t) {
-  t.plan(3);
+  t.plan(4);
 
   const serialse = (b: Board[]) =>
     JSON.stringify(
@@ -109,4 +109,25 @@ test("splitBoard", function (t) {
       [new Pixel(0, 3), new Pixel(0, 4)],
     ])
   );
+
+  t.equal(
+    serialse(
+      splitBoard([
+        new Pixel(3, 4),
+        new Pixel(17, 9),
+        new Pixel(12, 3),
+        new Pixel(1, 16),
+        new Pixel(12, 16),
+      ])
+    ),
+    serialse([
+      [new Pixel(3, 4)],
+      [new Pixel(17, 9)],
+      [new Pixel(12, 3)],
+      [new Pixel(1, 16)],
+      [new Pixel(12, 16)],
+    ])
+  );
+
+  t.end();
 });

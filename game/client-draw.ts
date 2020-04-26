@@ -9,7 +9,7 @@ const client = new gameOfLivesClient(
 );
 
 console.log("Sending random points");
-for (let i = 0; i < 5; i++) {
+for (let i = 0; i < 30; i++) {
   const px = new Pixel();
   px.setX(Math.floor(Math.random() * 20));
   px.setY(Math.floor(Math.random() * 20));
